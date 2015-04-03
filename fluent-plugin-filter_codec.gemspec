@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "fluent-plugin-filter_codec"
-  spec.version       = "0.0.1"
+  spec.version       = "0.0.2"
   spec.authors       = ["Neozaru"]
   spec.email         = ["neozaru@mailoo.org"]
   spec.description   = %q{Fluentd custom plugin to encode/decode fields}
