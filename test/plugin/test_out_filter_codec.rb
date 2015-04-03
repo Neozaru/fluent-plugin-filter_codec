@@ -22,14 +22,16 @@ class FilterCodecOutputTest < Test::Unit::TestCase
       field key1
       output_field key2
       codec base64-decode
+      error_value foo
     ])
 
     assert_equal 'decoded.', d.instance.add_tag_prefix
     assert_equal 'key1',    d.instance.field
     assert_equal 'key2', d.instance.output_field
     assert_equal 'base64-decode', d.instance.codec
+    assert_equal 'foo', d.instance.error_value
 
-    # output_field missing
+    # output_field and error_value missing
     d = create_driver(%[
       add_tag_prefix decoded.
       field key1
@@ -40,6 +42,7 @@ class FilterCodecOutputTest < Test::Unit::TestCase
     assert_equal 'key1',    d.instance.field
     assert_equal 'key1', d.instance.output_field
     assert_equal 'base64-decode', d.instance.codec
+    assert_equal '', d.instance.error_value
 
   end
 
@@ -132,6 +135,49 @@ class FilterCodecOutputTest < Test::Unit::TestCase
     assert_equal 1,           emits.count
     assert_equal 'encoded.test', emits[0][0]
     assert_equal 'Tmljb2xhcyBDYWdl',emits[0][2]['key2']
+  end
+
+  def test_emit_with_base64_decode_error_not_set
+    d = create_driver(%[
+      add_tag_prefix encoded.
+      field key1
+      output_field key2
+      codec base64-decode
+    ])
+
+    record = {
+      'key1' => "YmFkdmFsdWU",
+      'foo' => "bar"
+    }
+
+    d.run { d.emit(record) }
+    emits = d.emits
+
+    assert_equal 1,           emits.count
+    assert_equal 'encoded.test', emits[0][0]
+    assert_equal '',emits[0][2]['key2']
+  end
+
+  def test_emit_with_base64_decode_error_set
+    d = create_driver(%[
+      add_tag_prefix encoded.
+      field key1
+      output_field key2
+      codec base64-decode
+      error_value foo
+    ])
+
+    record = {
+      'key1' => "YmFkdmFsdWU",
+      'foo' => "bar"
+    }
+
+    d.run { d.emit(record) }
+    emits = d.emits
+
+    assert_equal 1,           emits.count
+    assert_equal 'encoded.test', emits[0][0]
+    assert_equal 'foo',emits[0][2]['key2']
   end
 
 end

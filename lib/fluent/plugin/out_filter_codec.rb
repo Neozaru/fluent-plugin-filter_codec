@@ -10,6 +10,7 @@ module Fluent
     config_param :field, :string, :default => nil
     config_param :output_field, :string, :default => nil
     config_param :codec, :string, :default => nil
+    config_param :error_value, :string, :default => ""
 
 
     def configure(conf)
@@ -32,6 +33,7 @@ module Fluent
       @field = field
       @codec = codec
       @output_field = output_field || field
+      @error_value = error_value
 
     end
 
@@ -60,6 +62,8 @@ module Fluent
       return @codec_functions[codec].call(value)
 
       return value
+    rescue
+      return @error_value
     end
 
     def base64_decode(value)
