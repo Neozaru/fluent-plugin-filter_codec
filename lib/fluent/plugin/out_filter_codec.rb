@@ -19,7 +19,9 @@ module Fluent
       # Put new functions here
       @codec_functions = {
         'base64-decode' => method(:base64_decode),
-        'base64-encode' => method(:base64_encode)
+        'base64-encode' => method(:base64_encode),
+        'urlsafe64-decode' => method(:urlsafe64_decode),
+        'urlsafe64-encode' => method(:urlsafe64_encode)
       }
 
       if (field.nil? || codec.nil?) 
@@ -60,8 +62,6 @@ module Fluent
     private
     def process(value, codec)
       return @codec_functions[codec].call(value)
-
-      return value
     rescue
       return @error_value
     end
@@ -74,5 +74,18 @@ module Fluent
       return Base64.strict_encode64(value)
     end
 
+    def add_one_padding(str)
+      return (0 != str.length % 4) ? str + '=' : str
+    end
+
+    def urlsafe64_decode(value)
+      # Add up to 2 '=' padding
+      return Base64.urlsafe_decode64(add_one_padding(add_one_padding(value)))
+    end
+
+    def urlsafe64_encode(value)
+      # Remove up to 2 '=' padding
+      return Base64.urlsafe_encode64(value).chomp('=').chomp('=')
+    end
   end
 end
