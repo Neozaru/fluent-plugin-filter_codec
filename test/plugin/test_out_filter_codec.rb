@@ -180,4 +180,89 @@ class FilterCodecOutputTest < Test::Unit::TestCase
     assert_equal 'foo',emits[0][2]['key2']
   end
 
+  def test_emit_with_urlsafe64_decode
+    d = create_driver(%[
+      add_tag_prefix decoded.
+      field key1
+      output_field key2
+      codec urlsafe64-decode
+    ])
+
+    record = {
+      'key1' => "Tmk-b2w_c8K_Q8O-Zy_CqSBDYWdl",
+      'foo' => "bar"
+    }
+    expect = "Ni>ol?s¿Cþg/© Cage".force_encoding("ASCII-8BIT")
+
+    d.run { d.emit(record) }
+    emits = d.emits
+
+    assert_equal 1,           emits.count
+    assert_equal 'decoded.test', emits[0][0]
+    assert_equal expect,emits[0][2]['key2']
+
+    # Remove last char
+    record['key1'][-2..-1] = 'c'
+    expect.slice!(-1)
+
+    d.run { d.emit(record) }
+    emits = d.emits
+
+    assert_equal 2,           emits.count
+    assert_equal 'decoded.test', emits[1][0]
+    assert_equal expect,emits[1][2]['key2']
+
+    # Remove last char
+    record['key1'][-2..-1] = 'Q'
+    expect.slice!(-1)
+
+    d.run { d.emit(record) }
+    emits = d.emits
+
+    assert_equal 3,           emits.count
+    assert_equal 'decoded.test', emits[2][0]
+    assert_equal expect,emits[2][2]['key2']
+  end
+
+  def test_emit_with_urlsafe64_encode
+    d = create_driver(%[
+      add_tag_prefix encoded.
+      field key1
+      output_field key2
+      codec urlsafe64-encode
+    ])
+
+    record = {
+      'key1' => "Ni>ol?s¿Cþg/© Cage".force_encoding("ASCII-8BIT"),
+      'foo' => "bar"
+    }
+
+    d.run { d.emit(record) }
+    emits = d.emits
+
+    assert_equal 1,           emits.count
+    assert_equal 'encoded.test', emits[0][0]
+    assert_equal 'Tmk-b2w_c8K_Q8O-Zy_CqSBDYWdl',emits[0][2]['key2']
+
+    # Remove last char
+    record['key1'].slice!(-1)
+
+    d.run { d.emit(record) }
+    emits = d.emits
+
+    assert_equal 2,           emits.count
+    assert_equal 'encoded.test', emits[1][0]
+    assert_equal 'Tmk-b2w_c8K_Q8O-Zy_CqSBDYWc',emits[1][2]['key2']
+
+    # Remove last char
+    record['key1'].slice!(-1)
+
+    d.run { d.emit(record) }
+    emits = d.emits
+
+    assert_equal 3,           emits.count
+    assert_equal 'encoded.test', emits[2][0]
+    assert_equal 'Tmk-b2w_c8K_Q8O-Zy_CqSBDYQ',emits[2][2]['key2']
+  end
+
 end
