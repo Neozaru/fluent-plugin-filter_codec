@@ -43,7 +43,7 @@ module Fluent
       es.each { |time, record|
         t = tag.dup
         filter_record(t, time, record)
-        Engine.emit(t, time, record)
+        router.emit(t, time, record)
       }
 
       chain.next
