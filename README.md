@@ -1,11 +1,48 @@
 # fluent-plugin-filter_codec
 
+## CodecFilter
+
+Fluentd filter plugin which converts a field in the record.
+Codec can be:
+ 'base64-encode' and 'base64-decode' see RFC 4648
+ 'urlsafe64-encode' and 'urlsafe64-decode' replacing '+/' by '-_' and making '=' padding optional
+
+### Usage
+
+```
+<filter test>
+    type codec
+    codec base64-decode
+    field key1
+    output_field key2
+</filter>
+```
+
+Example of records :
+```
+{
+    'key1' => "Tmljb2xhcyBDYWdl",
+    'foo' => "bar"
+}
+```
+... will output (unchanged) :
+```
+{
+    'key1' => "Nicolas Cage",
+    'foo' => "bar"
+}
+```
+
+You can omit 'output_field' so 'field' value will be replaced by output value.
+
+## FilterCodecOutput
+
 Fluentd output plugin which converts a field in the record.
 Codec can be:
  'base64-encode' and 'base64-decode' see RFC 4648
  'urlsafe64-encode' and 'urlsafe64-decode' replacing '+/' by '-_' and making '=' padding optional
 
-## Usage
+### Usage
 
 ```
 <match test>
