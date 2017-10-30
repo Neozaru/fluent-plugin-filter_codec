@@ -56,11 +56,11 @@ module Fluent
         return
       end
 
-      record[@output_field] = process(value_in, @codec) || value_in
+      record[@output_field] = process_filter(value_in, @codec) || value_in
     end
 
     private
-    def process(value, codec)
+    def process_filter(value, codec)
       return @codec_functions[codec].call(value)
     rescue
       return @error_value
