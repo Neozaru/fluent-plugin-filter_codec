@@ -26,7 +26,7 @@ module Fluent
         'urlsafe64-encode' => method(:urlsafe64_encode)
       }
 
-      if (field.nil? || codec.nil?) 
+      if (field.nil? || codec.nil?)
         raise ConfigError, "filter_codec: Both 'field', and 'codec' are required to be set."
       end
 

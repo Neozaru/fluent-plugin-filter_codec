@@ -1,6 +1,7 @@
 # coding: utf-8
 
 require 'test_helper'
+require 'fluent/test/driver/filter'
 require 'fluent/plugin/filter_codec'
 
 class CodecFilterTest < Test::Unit::TestCase
@@ -8,9 +9,9 @@ class CodecFilterTest < Test::Unit::TestCase
     Fluent::Test.setup
   end
 
-  def create_driver(conf, tag = 'test')
-    Fluent::Test::FilterTestDriver.new(
-      Fluent::CodecFilter, tag
+  def create_driver(conf)
+    Fluent::Test::Driver::Filter.new(
+      Fluent::Plugin::CodecFilter
     ).configure(conf)
   end
 
@@ -81,12 +82,11 @@ class CodecFilterTest < Test::Unit::TestCase
       'foo' => "bar"
     }
 
-    d.run { d.emit(record) }
-    emits = d.filtered_as_array
+    d.run(default_tag: 'test') { d.feed(record) }
+    emits = d.filtered
 
     assert_equal 1,           emits.count
-    assert_equal 'test', emits[0][0]
-    assert_equal 'Nicolas Cage',emits[0][2]['key2']
+    assert_equal 'Nicolas Cage',emits[0][1]['key2']
   end
 
   def test_emit_with_base64_decode_and_no_output
@@ -100,12 +100,11 @@ class CodecFilterTest < Test::Unit::TestCase
       'foo' => "bar"
     }
 
-    d.run { d.emit(record) }
-    emits = d.filtered_as_array
+    d.run(default_tag: 'test') { d.feed(record) }
+    emits = d.filtered
 
     assert_equal 1,           emits.count
-    assert_equal 'test', emits[0][0]
-    assert_equal 'Nicolas Cage',emits[0][2]['key1']
+    assert_equal 'Nicolas Cage',emits[0][1]['key1']
   end
 
   def test_emit_with_base64_encode
@@ -120,12 +119,11 @@ class CodecFilterTest < Test::Unit::TestCase
       'foo' => "bar"
     }
 
-    d.run { d.emit(record) }
-    emits = d.filtered_as_array
+    d.run(default_tag: 'test') { d.feed(record) }
+    emits = d.filtered
 
     assert_equal 1,           emits.count
-    assert_equal 'test', emits[0][0]
-    assert_equal 'Tmljb2xhcyBDYWdl',emits[0][2]['key2']
+    assert_equal 'Tmljb2xhcyBDYWdl',emits[0][1]['key2']
   end
 
   def test_emit_with_base64_decode_error_not_set
@@ -140,12 +138,11 @@ class CodecFilterTest < Test::Unit::TestCase
       'foo' => "bar"
     }
 
-    d.run { d.emit(record) }
-    emits = d.filtered_as_array
+    d.run(default_tag: 'test') { d.feed(record) }
+    emits = d.filtered
 
     assert_equal 1,           emits.count
-    assert_equal 'test', emits[0][0]
-    assert_equal '',emits[0][2]['key2']
+    assert_equal '',emits[0][1]['key2']
   end
 
   def test_emit_with_base64_decode_error_set
@@ -161,12 +158,11 @@ class CodecFilterTest < Test::Unit::TestCase
       'foo' => "bar"
     }
 
-    d.run { d.emit(record) }
-    emits = d.filtered_as_array
+    d.run(default_tag: 'test') { d.feed(record) }
+    emits = d.filtered
 
     assert_equal 1,           emits.count
-    assert_equal 'test', emits[0][0]
-    assert_equal 'foo',emits[0][2]['key2']
+    assert_equal 'foo',emits[0][1]['key2']
   end
 
   data("base" => {"key1" => "Tmk-b2w_c8K_Q8O-Zy_CqSBDYWdl",
@@ -189,12 +185,11 @@ class CodecFilterTest < Test::Unit::TestCase
     }
     expect = "Ni>ol?s¿Cþg/© Cage".force_encoding("ASCII-8BIT")
 
-    d.run { d.emit(record) }
-    emits = d.filtered_as_array
+    d.run(default_tag: 'test') { d.feed(record) }
+    emits = d.filtered
 
     assert_equal 1,           emits.count
-    assert_equal 'test', emits[0][0]
-    assert_equal data["expected"],emits[0][2]['key2']
+    assert_equal data["expected"],emits[0][1]['key2']
   end
 
   data("base" => {"key1" => "Ni>ol?s¿Cþg/© Cage".force_encoding("ASCII-8BIT"),
@@ -216,12 +211,11 @@ class CodecFilterTest < Test::Unit::TestCase
       'foo' => "bar"
     }
 
-    d.run { d.emit(record) }
-    emits = d.filtered_as_array
+    d.run(default_tag: 'test') { d.feed(record) }
+    emits = d.filtered
 
     assert_equal 1,           emits.count
-    assert_equal 'test', emits[0][0]
-    assert_equal data["expected"],emits[0][2]['key2']
+    assert_equal data["expected"],emits[0][1]['key2']
   end
 
 end

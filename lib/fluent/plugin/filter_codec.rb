@@ -1,8 +1,9 @@
 # coding: utf-8
 require "base64"
+require "fluent/plugin/filter"
 require "fluent/plugin/filter_codec_support"
 
-module Fluent
+module Fluent::Plugin
   class CodecFilter < Filter
     include Fluent::FilterCodecSupport
 
@@ -26,11 +27,11 @@ module Fluent
       }
 
       if (field.nil? || codec.nil?)
-        raise ConfigError, "filter_codec: Both 'field', and 'codec' are required to be set."
+        raise Fluent::ConfigError, "filter_codec: Both 'field', and 'codec' are required to be set."
       end
 
       if (@codec_functions[codec].nil?)
-        raise ConfigError, "filter_codec: Unknown codec : " + codec
+        raise Fluent::ConfigError, "filter_codec: Unknown codec : " + codec
       end
 
       @output_field = output_field || field
